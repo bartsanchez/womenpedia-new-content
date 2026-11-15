@@ -94,8 +94,12 @@ def main():
         dest = OUT / url(lang, path).strip("/") / "index.html"
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(page, encoding="utf-8")
-        if lang == "en":  # old /en/... URLs keep working
-            redirect = OUT / "en" / ("" if path == "home" else path) / "index.html"
+        # Old Wiki.js URLs keep working: /en/..., and /home, /en/home, /es/home, /pt/home.
+        old = [f"en/{path}"] if lang == "en" else []
+        if path == "home":
+            old += ["home", "en"] if lang == "en" else [f"{lang}/home"]
+        for o in old:
+            redirect = OUT / o / "index.html"
             redirect.parent.mkdir(parents=True, exist_ok=True)
             redirect.write_text(f'<!DOCTYPE html><meta http-equiv="refresh" content="0; url={url(lang, path)}">'
                                 f'<link rel="canonical" href="{url(lang, path)}">', encoding="utf-8")
